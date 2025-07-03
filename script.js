@@ -124,10 +124,10 @@ function draw(e) {
 function stopDrawing(e) {
   e.preventDefault();
 
-  if (gamePaused) return;
+  if (gamePaused) return; // If game is already paused (e.g., due to wrong direction or completion), don't do anything
 
   isDrawing = false;
-  gamePaused = true;
+  gamePaused = true; // Pause the game when finger is lifted
 
   if (path.length >= 10) {
     const center = getCenter(path);
@@ -140,13 +140,7 @@ function stopDrawing(e) {
     const roundedScore = score.toFixed(2);
     const color = getColorForScore(score);
 
-    // ✅ Update high score if beaten
-    if (score > highScore) {
-      highScore = score;
-      localStorage.setItem("perfectCircleHighScore", highScore.toFixed(2));
-      updateHighScoreDisplay();
-    }
-
+    // No high score update here. This is only for displaying the current accuracy when lifted.
     resultText.innerHTML = `<span style="color: ${color}; font-weight: bold;">Final Accuracy: ${roundedScore} / 100 ⏸️ Finger lifted.</span>`;
   } else {
     resultText.innerHTML = `<span style="color: gray;">Too short to calculate accuracy.</span>`;
@@ -222,11 +216,12 @@ function checkIfCircleCompleted() {
 
   const start = path[0];
   const end = path[path.length - 1];
-  const loopClosed = distance(start, end) < 50;
+  const loopClosed = distance(start, end) < 50; // This condition might need tweaking based on desired closure
 
+  // Check if a full circle is completed (at least 360 degrees of rotation)
   if (Math.abs(totalAngleChange) >= 2 * Math.PI) {
     isDrawing = false;
-    gamePaused = true;
+    gamePaused = true; // Pause the game when a circle is completed
 
     const variance = radii.reduce((a, b) => a + Math.pow(b - avgRadius, 2), 0) / radii.length;
     const stdDev = Math.sqrt(variance);
@@ -234,7 +229,7 @@ function checkIfCircleCompleted() {
     const roundedScore = score.toFixed(2);
     const color = getColorForScore(score);
 
-    // ✅ Update high score if beaten
+    // ✅ Update high score ONLY if beaten AND circle is completed
     if (score > highScore) {
       highScore = score;
       localStorage.setItem("perfectCircleHighScore", highScore.toFixed(2));

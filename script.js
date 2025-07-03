@@ -12,7 +12,13 @@ let lastAngle = 0;
 let direction = 0;
 const MIN_POINTS_FOR_DIRECTION = 15;
 const ANGLE_CHANGE_TOLERANCE = 0.2;
+let highScore = parseFloat(localStorage.getItem("perfectCircleHighScore")) || 0;
 
+function updateHighScoreDisplay() {
+  const display = document.getElementById("high-score");
+  display.innerText = `🏆 High Score: ${highScore.toFixed(2)} / 100`;
+}
+updateHighScoreDisplay();
 // 🎉 Confetti
 function launchConfetti() {
   const duration = 1000;
@@ -118,22 +124,28 @@ function draw(e) {
 function stopDrawing(e) {
   e.preventDefault();
 
-  if (gamePaused) return; // ⛔ Don't reset if game is already paused (circle completed or error)
+  if (gamePaused) return;
 
   isDrawing = false;
   gamePaused = true;
 
-  // Final score if user lifts before completing the circle
   if (path.length >= 10) {
     const center = getCenter(path);
     const radii = path.map(p => distance(p, center));
-    const avgRadius = radii.reduce((a, b) => a + b) / radii.length;
+    const avgRadius = radii.reduce((a, b) => a + b, 0) / radii.length;
 
     const variance = radii.reduce((a, b) => a + Math.pow(b - avgRadius, 2), 0) / radii.length;
     const stdDev = Math.sqrt(variance);
     const score = Math.max(0, 100 - stdDev);
     const roundedScore = score.toFixed(2);
     const color = getColorForScore(score);
+
+    // ✅ Update high score if beaten
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("perfectCircleHighScore", highScore.toFixed(2));
+      updateHighScoreDisplay();
+    }
 
     resultText.innerHTML = `<span style="color: ${color}; font-weight: bold;">Final Accuracy: ${roundedScore} / 100 ⏸️ Finger lifted.</span>`;
   } else {
@@ -221,6 +233,13 @@ function checkIfCircleCompleted() {
     const score = Math.max(0, 100 - stdDev);
     const roundedScore = score.toFixed(2);
     const color = getColorForScore(score);
+
+    // ✅ Update high score if beaten
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("perfectCircleHighScore", highScore.toFixed(2));
+      updateHighScoreDisplay();
+    }
 
     if (avgRadius < 50) {
       resultText.innerHTML = `<span style="color: ${color}; font-weight: bold;">Live Accuracy: ${roundedScore} / 100 ❌ Too small! Try a bigger circle.</span>`;

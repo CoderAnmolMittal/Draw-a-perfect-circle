@@ -1,0 +1,24 @@
+body {
+  text-align: center;
+  font-family: sans-serif;
+  background: #f2f2f2;
+}
+
+canvas {
+  border: 2px solid #333;
+  background: white;
+  margin: 20px auto;
+  display: block;
+  cursor: crosshair;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+#result {
+  font-size: 20px;
+  margin-top: 20px;
+  font-weight: bold;
+}

@@ -1,12 +1,12 @@
 body {
   text-align: center;
   font-family: sans-serif;
-  background: #f2f2f2;
+  background: #000000;
 }
 
 canvas {
-  border: 2px solid #333;
-  background: white;
+  border: 2px solid #ffffff;
+  background: rgb(0, 0, 0);
   margin: 20px auto;
   display: block;
   cursor: crosshair;

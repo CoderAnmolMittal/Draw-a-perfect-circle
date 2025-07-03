@@ -22,3 +22,10 @@ button {
   margin-top: 20px;
   font-weight: bold;
 }
+#high-score {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-top: 10px;
+  color: #ebebeb;
+}
+

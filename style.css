@@ -1,27 +1,16 @@
-body {
-  text-align: center;
-  font-family: sans-serif;
-  background: #000000;
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  background: black;
 }
 
 canvas {
-  border: 2px solid #ffffff;
-  background: rgb(0, 0, 0);
-  margin: 20px auto;
   display: block;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+  background: black;
   cursor: crosshair;
 }
-
-
-#result {
-  font-size: 20px;
-  margin-top: 20px;
-  font-weight: bold;
-}
-#high-score {
-  font-weight: bold;
-  font-size: 1.2em;
-  margin-top: 10px;
-  color: #ebebeb;
-}
-

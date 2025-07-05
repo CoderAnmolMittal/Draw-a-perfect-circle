@@ -1,6 +1,6 @@
 # 🎯 Draw a Perfect Circle Game
 
-**Live Demo** 👉 [Play Now](https://your-username.github.io/draw-a-perfect-circle/)  
+**Live Demo** 👉 [Play Now](https://drawperfectcircle.netlify.app/)  
 _A fun challenge to test your freehand drawing accuracy!_
 
 ---
@@ -42,7 +42,7 @@ You'll get:
 This game is built using **HTML, CSS, and Vanilla JS** — no libraries required.
 
 ### Play it live:
-**🔗 https://your-username.github.io/draw-a-perfect-circle/**
+**🔗 https://drawperfectcircle.netlify.app/**
 
 Or clone and run locally:
 ```bash

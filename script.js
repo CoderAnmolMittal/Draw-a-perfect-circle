@@ -3,8 +3,6 @@ const ctx = canvas.getContext("2d");
 ctx.lineWidth = 5;
 ctx.lineCap = "round";
 
-const resultText = document.getElementById("result");
-
 let isDrawing = false;
 let path = [];
 let gamePaused = false;
@@ -14,11 +12,40 @@ const MIN_POINTS_FOR_DIRECTION = 15;
 const ANGLE_CHANGE_TOLERANCE = 0.2;
 let highScore = parseFloat(localStorage.getItem("perfectCircleHighScore")) || 0;
 
-function updateHighScoreDisplay() {
-  const display = document.getElementById("high-score");
-  display.innerText = `🏆 High Score: ${highScore.toFixed(2)} / 100`;
+// 🖼 Resize Canvas to Fullscreen
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  drawStaticText();
 }
-updateHighScoreDisplay();
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// 🖊️ Static Text: Title & High Score
+function drawStaticText() {
+  ctx.save();
+  ctx.clearRect(0, 0, canvas.width, 80);
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.font = "bold 32px sans-serif";
+  ctx.fillText("Draw a Perfect Circle", canvas.width / 2, 40);
+  ctx.font = "20px sans-serif";
+  ctx.fillText(`🏆 High Score: ${highScore.toFixed(2)} / 100`, canvas.width / 2, 70);
+  ctx.restore();
+}
+
+
+function drawOverlayText(text, color = 'white') {
+  ctx.save();
+  ctx.clearRect(0, canvas.height - 50, canvas.width, 50);
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.font = "bold 24px sans-serif";
+  ctx.fillText(text, canvas.width / 2, canvas.height - 20);
+  ctx.restore();
+}
+
+
 // 🎉 Confetti
 function launchConfetti() {
   const duration = 1000;
@@ -44,6 +71,7 @@ function launchConfetti() {
   frame();
 }
 
+// ✏️ Drawing Helpers
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   return e.touches
@@ -55,9 +83,9 @@ function startDrawing(e) {
   e.preventDefault();
   if (gamePaused) {
     gamePaused = false;
-    resultText.innerText = "Keep drawing...";
     path = [];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 80, canvas.width, canvas.height - 130);
+    drawStaticText();
     lastAngle = 0;
     direction = 0;
   }
@@ -96,8 +124,8 @@ function draw(e) {
         if ((direction === 1 && angleChange < -ANGLE_CHANGE_TOLERANCE) ||
             (direction === -1 && angleChange > ANGLE_CHANGE_TOLERANCE)) {
           gamePaused = true;
-          resultText.innerHTML = `<span style="color: red; font-weight: bold;">❌ Wrong Way! Please draw in a consistent direction.</span>`;
           alert("You're drawing in the wrong direction! Try again.");
+          drawOverlayText("❌ Wrong Direction!", "red");
           return;
         }
       }
@@ -107,14 +135,17 @@ function draw(e) {
 
   path.push({ x: pos.x, y: pos.y, color });
 
-  // Redraw
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 80, canvas.width, canvas.height - 130); // Clear drawing area
+  drawStaticText();
+
   for (let i = 1; i < path.length; i++) {
     ctx.beginPath();
     ctx.moveTo(path[i - 1].x, path[i - 1].y);
     ctx.lineTo(path[i].x, path[i].y);
     ctx.strokeStyle = path[i].color;
     ctx.stroke();
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
   }
 
   updateScore();
@@ -123,47 +154,39 @@ function draw(e) {
 
 function stopDrawing(e) {
   e.preventDefault();
-
-  if (gamePaused) return; // If game is already paused (e.g., due to wrong direction or completion), don't do anything
-
+  if (gamePaused) return;
   isDrawing = false;
-  gamePaused = true; // Pause the game when finger is lifted
+  gamePaused = true;
 
   if (path.length >= 10) {
     const center = getCenter(path);
     const radii = path.map(p => distance(p, center));
     const avgRadius = radii.reduce((a, b) => a + b, 0) / radii.length;
-
-    const variance = radii.reduce((a, b) => a + Math.pow(b - avgRadius, 2), 0) / radii.length;
-    const stdDev = Math.sqrt(variance);
+    const stdDev = Math.sqrt(radii.reduce((a, b) => a + Math.pow(b - avgRadius, 2), 0) / radii.length);
     const score = Math.max(0, 100 - stdDev);
     const roundedScore = score.toFixed(2);
     const color = getColorForScore(score);
-
-    // No high score update here. This is only for displaying the current accuracy when lifted.
-    resultText.innerHTML = `<span style="color: ${color}; font-weight: bold;">Final Accuracy: ${roundedScore} / 100 ⏸️ Finger lifted.</span>`;
+    drawOverlayText(`Final Accuracy: ${roundedScore} / 100`, color);
   } else {
-    resultText.innerHTML = `<span style="color: gray;">Too short to calculate accuracy.</span>`;
+    drawOverlayText("Too short to calculate accuracy.", "gray");
   }
 }
 
-
 function updateScore() {
   if (path.length < 10) {
-    resultText.innerHTML = `<span style="color: gray;">Keep drawing...</span>`;
+    drawOverlayText("Keep drawing...", "gray");
     return;
   }
 
   const center = getCenter(path);
   const radii = path.map(p => distance(p, center));
   const avgRadius = radii.reduce((a, b) => a + b, 0) / radii.length;
-  const variance = radii.reduce((a, b) => a + Math.pow(b - avgRadius, 2), 0) / radii.length;
-  const stdDev = Math.sqrt(variance);
+  const stdDev = Math.sqrt(radii.reduce((a, b) => a + Math.pow(b - avgRadius, 2), 0) / radii.length);
   const score = Math.max(0, 100 - stdDev);
   const roundedScore = score.toFixed(2);
   const color = getColorForScore(score);
 
-  resultText.innerHTML = `<span style="color: ${color}; font-weight: bold;">Live Accuracy: ${roundedScore} / 100</span>`;
+  drawOverlayText(`Live Accuracy: ${roundedScore} / 100`, color);
 }
 
 function getColorForScore(score) {
@@ -205,8 +228,7 @@ function checkIfCircleCompleted() {
   let prevAngle = Math.atan2(path[0].y - center.y, path[0].x - center.x);
 
   for (let i = 1; i < path.length; i++) {
-    const curr = path[i];
-    const angle = Math.atan2(curr.y - center.y, curr.x - center.x);
+    const angle = Math.atan2(path[i].y - center.y, path[i].x - center.x);
     let delta = angle - prevAngle;
     if (delta > Math.PI) delta -= 2 * Math.PI;
     if (delta < -Math.PI) delta += 2 * Math.PI;
@@ -214,14 +236,11 @@ function checkIfCircleCompleted() {
     prevAngle = angle;
   }
 
-  const start = path[0];
-  const end = path[path.length - 1];
-  const loopClosed = distance(start, end) < 50; // This condition might need tweaking based on desired closure
+  const loopClosed = distance(path[0], path[path.length - 1]) < 50;
 
-  // Check if a full circle is completed (at least 360 degrees of rotation)
   if (Math.abs(totalAngleChange) >= 2 * Math.PI) {
     isDrawing = false;
-    gamePaused = true; // Pause the game when a circle is completed
+    gamePaused = true;
 
     const variance = radii.reduce((a, b) => a + Math.pow(b - avgRadius, 2), 0) / radii.length;
     const stdDev = Math.sqrt(variance);
@@ -229,23 +248,21 @@ function checkIfCircleCompleted() {
     const roundedScore = score.toFixed(2);
     const color = getColorForScore(score);
 
-    // ✅ Update high score ONLY if beaten AND circle is completed
     if (score > highScore) {
       highScore = score;
       localStorage.setItem("perfectCircleHighScore", highScore.toFixed(2));
-      updateHighScoreDisplay();
     }
 
     if (avgRadius < 50) {
-      resultText.innerHTML = `<span style="color: ${color}; font-weight: bold;">Live Accuracy: ${roundedScore} / 100 ❌ Too small! Try a bigger circle.</span>`;
+      drawOverlayText(`❌ Too small! Try a bigger circle. (${roundedScore}/100)`, color);
     } else {
-      resultText.innerHTML = `<span style="color: ${color}; font-weight: bold;">Live Accuracy: ${roundedScore} / 100 🎯 Circle completed!</span>`;
+      drawOverlayText(`🎯 Circle completed! Accuracy: ${roundedScore} / 100`, color);
       if (score >= 90) launchConfetti();
     }
   }
 }
 
-// Confetti CSS
+// 🎉 Confetti CSS
 const style = document.createElement('style');
 style.innerHTML = `
 .confetti {

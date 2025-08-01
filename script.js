@@ -37,11 +37,11 @@ function drawStaticText() {
 
 function drawOverlayText(text, color = 'white') {
   ctx.save();
-  ctx.clearRect(0, canvas.height - 50, canvas.width, 50);
+  ctx.clearRect(0, canvas.height - 80, canvas.width, 80);
   ctx.fillStyle = color;
   ctx.textAlign = "center";
   ctx.font = "bold 24px sans-serif";
-  ctx.fillText(text, canvas.width / 2, canvas.height - 20);
+  ctx.fillText(text, canvas.width / 2, canvas.height -30);
   ctx.restore();
 }
 

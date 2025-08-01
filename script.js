@@ -34,16 +34,28 @@ function drawStaticText() {
   ctx.restore();
 }
 
-
 function drawOverlayText(text, color = 'white') {
   ctx.save();
-  ctx.clearRect(0, canvas.height - 80, canvas.width, 80);
+
+  const safePadding = 90; // height to clear, and where to draw the text
+  const bottomTextY = canvas.height - 30;
+
+  ctx.clearRect(0, canvas.height - safePadding, canvas.width, safePadding);
   ctx.fillStyle = color;
   ctx.textAlign = "center";
-  ctx.font = "bold 24px sans-serif";
-  ctx.fillText(text, canvas.width / 2, canvas.height -30);
+
+  // Responsive font size
+  const fontSize = Math.max(16, canvas.width * 0.045); // ~24px on desktop, scales down on mobile
+  ctx.font = `bold ${fontSize}px sans-serif`;
+
+  // Make sure we only draw if height is tall enough
+  if (bottomTextY > 0) {
+    ctx.fillText(text, canvas.width / 2, bottomTextY);
+  }
+
   ctx.restore();
 }
+
 
 
 // 🎉 Confetti
